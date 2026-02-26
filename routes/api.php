@@ -20,6 +20,7 @@ Route::get('vendors/{vendor}',           [VendorController::class,  'show']);
 Route::get('vendors/{vendor}/products',  [ProductController::class, 'index']);
 Route::get('products/{product}',         [ProductController::class, 'show']);
 Route::get('categories',                 [CategoryController::class,'index']);
+Route::get('categories/{category}',      [CategoryController::class,'show']);
 
 // -----------------------------------------------
 // Protected routes — must be authenticated
