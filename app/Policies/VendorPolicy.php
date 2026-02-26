@@ -4,63 +4,42 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Vendor;
-use Illuminate\Auth\Access\Response;
 
 class VendorPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    // View any vendor — everyone including guests
+    public function viewAny(?User $user): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Vendor $vendor): bool
+    // View single vendor — everyone including guests
+    public function view(?User $user, Vendor $vendor): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
+    // Create vendor — super_admin only
     public function create(User $user): bool
     {
-        return false;
+        return $user->isSuperAdmin();
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
+    // Update vendor:
+    // super_admin → can update ANY vendor
+    // vendor      → can only update THEIR OWN store
     public function update(User $user, Vendor $vendor): bool
     {
-        return false;
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        return $user->isVendor() && $vendor->owner_id === $user->id;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
+    // Delete vendor — super_admin only
     public function delete(User $user, Vendor $vendor): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Vendor $vendor): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Vendor $vendor): bool
-    {
-        return false;
+        return $user->isSuperAdmin();
     }
 }

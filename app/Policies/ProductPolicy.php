@@ -4,63 +4,47 @@ namespace App\Policies;
 
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ProductPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    // Anyone can browse products
+    public function viewAny(?User $user): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Product $product): bool
+    // Anyone can view a single product
+    public function view(?User $user, Product $product): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
+    // Only vendors can create products — and only for their OWN store
     public function create(User $user): bool
     {
-        return false;
+        return $user->isVendor();
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
+    // Only the vendor who OWNS the store this product belongs to
     public function update(User $user, Product $product): bool
     {
-        return false;
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        // Check: does this vendor own the store this product belongs to?
+        return $user->isVendor() &&
+               $product->vendor->owner_id === $user->id;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
+    // Same logic as update
     public function delete(User $user, Product $product): bool
     {
-        return false;
-    }
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Product $product): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Product $product): bool
-    {
-        return false;
+        return $user->isVendor() &&
+               $product->vendor->owner_id === $user->id;
     }
 }
