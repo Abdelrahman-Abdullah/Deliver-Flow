@@ -1,0 +1,124 @@
+version: '3.8'
+
+networks:
+  deliverflow:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+
+services:
+
+  # -----------------------------------------------
+  # NGINX - Web Server
+  # -----------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: deliverflow_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - deliverflow
+
+  # -----------------------------------------------
+  # PHP-FPM 8.3
+  # -----------------------------------------------
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: deliverflow_php
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - deliverflow
+    environment:
+      - PHP_OPCACHE_ENABLE=1
+
+  # -----------------------------------------------
+  # MySQL 8.0
+  # -----------------------------------------------
+  mysql:
+    image: mysql:8.0
+    platform: linux/x86_64
+    container_name: deliverflow_mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - deliverflow
+    environment:
+      MYSQL_DATABASE: deliverflow
+      MYSQL_USER: deliverflow_user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+
+  # -----------------------------------------------
+  # Redis - Cache, Queues & Location Storage
+  # -----------------------------------------------
+  redis:
+    image: redis:alpine
+    container_name: deliverflow_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - deliverflow
+    command: redis-server --appendonly yes
+
+  # -----------------------------------------------
+  # Laravel Websockets - Real-Time Server
+  # -----------------------------------------------
+  websockets:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: deliverflow_websockets
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "6001:6001"
+    networks:
+      - deliverflow
+    depends_on:
+      - php
+      - redis
+    command: php artisan websockets:serve
+
+  # -----------------------------------------------
+  # Queue Worker - Process Background Jobs
+  # -----------------------------------------------
+  queue:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: deliverflow_queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - deliverflow
+    depends_on:
+      - mysql
+      - redis
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=60
