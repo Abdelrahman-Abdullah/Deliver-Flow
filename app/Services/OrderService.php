@@ -67,6 +67,7 @@ class OrderService
 
     public function updateOrderStatus(Order $order, User $user, string $status)
     {
+
         $allowedStatuses = $this->getAllowedTransitions($order, $user);
 
         if (!in_array($status, $allowedStatuses)) {

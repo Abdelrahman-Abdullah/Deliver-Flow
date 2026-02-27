@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\VendorController;
+use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 
 // -----------------------------------------------
@@ -53,5 +54,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('orders', [OrderController::class, 'index']);
     Route::post('orders', [OrderController::class, 'store']);
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
-
+    Route::delete('orders/{order}', [OrderController::class, 'destroy']);
 });

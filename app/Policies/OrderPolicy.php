@@ -45,11 +45,11 @@ class OrderPolicy
         // Vendor can update orders for their store
         // Driver can update orders assigned to them
         // Customer can update their own orders but only if they are still pending or accepted (not yet preparing)
-       match (true) {
+       return match (true) {
             $user->isSuperAdmin() => true,
             $user->isVendor()     => $order->vendor->owner_id === $user->id,
             $user->isDriver()     => $order->driver_id === $user->id,
-            $user->isCustomer()   => $order->customer_id === $user->id && in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_ACCEPTED]),
+            $user->isCustomer()   => $order->customer_id === $user->id, 
             default               => false,
         };
     }
@@ -57,9 +57,11 @@ class OrderPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Order $order): bool
+    public function cancle(User $user, Order $order): bool
     {
-        return false;
+        return $user->isCustomer()
+         && $order->customer_id === $user->id 
+         && $order->isCancellable();
     }
 
     /**

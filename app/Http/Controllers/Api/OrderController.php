@@ -57,19 +57,31 @@ class OrderController extends Controller
         }
     }
 
-        public function updateStatus(UpdateOrderStatusRequest $request, Order $order)
-        {
-            $this->authorize('update', $order);
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order)
+    {
+        $this->authorize('update', $order);
 
-            try {
+        try {
 
-                $order = $this->orderService->updateOrderStatus($order, auth()->user(), $request->validated('status'));
-                return $this->successResponse(new OrderResource($order), 'Order status updated successfully');
-                
-            } catch (\Exception $e) {
-                return $this->errorResponse($e->getMessage(), 400);
-            }
-
+            $order = $this->orderService->updateOrderStatus($order, auth()->user(), $request->validated('status'));
+            return $this->successResponse(new OrderResource($order), 'Order status updated successfully');
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
         }
+
+    }
+
+    public function destroy(Order $order)
+    {
+        $this->authorize('cancel', $order);
+        
+        try {
+            $this->orderService->updateOrderStatus($order, auth()->user(), Order::STATUS_CANCELLED);
+            return $this->successResponse(null, 'Order cancelled successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
+        }
+    }
 
 }
