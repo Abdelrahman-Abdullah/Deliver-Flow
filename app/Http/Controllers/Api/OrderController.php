@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\StoreOrderRequest;
+use App\Http\Requests\Order\UpdateOrderStatusRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Services\OrderService;
@@ -55,5 +56,20 @@ class OrderController extends Controller
             return $this->errorResponse($e->getMessage(), 400);
         }
     }
+
+        public function updateStatus(UpdateOrderStatusRequest $request, Order $order)
+        {
+            $this->authorize('update', $order);
+
+            try {
+
+                $order = $this->orderService->updateOrderStatus($order, auth()->user(), $request->validated('status'));
+                return $this->successResponse(new OrderResource($order), 'Order status updated successfully');
+                
+            } catch (\Exception $e) {
+                return $this->errorResponse($e->getMessage(), 400);
+            }
+
+        }
 
 }

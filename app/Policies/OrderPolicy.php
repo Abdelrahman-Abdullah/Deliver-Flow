@@ -41,7 +41,17 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        return false;
+        // Admin can update any order
+        // Vendor can update orders for their store
+        // Driver can update orders assigned to them
+        // Customer can update their own orders but only if they are still pending or accepted (not yet preparing)
+       match (true) {
+            $user->isSuperAdmin() => true,
+            $user->isVendor()     => $order->vendor->owner_id === $user->id,
+            $user->isDriver()     => $order->driver_id === $user->id,
+            $user->isCustomer()   => $order->customer_id === $user->id && in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_ACCEPTED]),
+            default               => false,
+        };
     }
 
     /**

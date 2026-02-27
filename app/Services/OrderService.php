@@ -65,4 +65,66 @@ class OrderService
 
     }
 
+    public function updateOrderStatus(Order $order, User $user, string $status)
+    {
+        $allowedStatuses = $this->getAllowedTransitions($order, $user);
+
+        if (!in_array($status, $allowedStatuses)) {
+            throw new \Exception("Cannot transition order from '{$order->status}' to '{$status}'.");
+        }
+
+        $order->status = $status;
+        if ($status === Order::STATUS_DELIVERED) {
+            $order->delivered_at = now();
+        }
+        $order->save();
+
+        return $order->fresh(); // Return the updated order with all relationships loaded
+    }
+
+    private function getAllowedTransitions(Order $order, User $user): array
+    {
+        if ($user->vendor()) {
+            return match ($order->status) {
+                Order::STATUS_PENDING   => [Order::STATUS_ACCEPTED, Order::STATUS_CANCELLED],
+                Order::STATUS_ACCEPTED  => [Order::STATUS_PREPARING, Order::STATUS_CANCELLED],
+                Order::STATUS_PREPARING => [Order::STATUS_READY],
+                default                 => [],
+    
+            };
+        }
+
+        if ($user->driver()) {
+            return match ($order->status) {
+                Order::STATUS_READY => [Order::STATUS_PICKED_UP],
+                Order::STATUS_PICKED_UP => [Order::STATUS_DELIVERED],
+                default => [],
+            };
+        }
+
+        if ($user->customer()) {
+            return match ($order->status) {
+                Order::STATUS_PENDING => [Order::STATUS_CANCELLED],
+                default => [],
+            };
+        }
+
+        if ($user->isSuperAdmin()) {
+            return [
+                Order::STATUS_PENDING,
+                Order::STATUS_ACCEPTED,
+                Order::STATUS_PREPARING,
+                Order::STATUS_READY,
+                Order::STATUS_PICKED_UP,
+                Order::STATUS_DELIVERED,
+                Order::STATUS_CANCELLED,
+            ];
+  
+        }
+
+        return [];
+
+
+    }
+
 }
