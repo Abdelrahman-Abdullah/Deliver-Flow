@@ -57,6 +57,13 @@ class OrderController extends Controller
         }
     }
 
+    public function show(Order $order)
+    {
+        $this->authorize('view', $order);
+        $order->load(['customer', 'vendor', 'driver', 'items.product']);
+        return $this->successResponse(new OrderResource($order), 'Order details retrieved successfully');
+    }
+
     public function updateStatus(UpdateOrderStatusRequest $request, Order $order)
     {
         $this->authorize('update', $order);
@@ -70,6 +77,21 @@ class OrderController extends Controller
             return $this->errorResponse($e->getMessage(), 400);
         }
 
+    }
+
+    public function assignDriver(Request $request, Order $order)
+    {
+        $this->authorize('assignDriver', $order);
+        $request->validate([
+            'driver_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            $order = $this->orderService->assignDriver($order, $request->validated('driver_id'));
+            return $this->successResponse(new OrderResource($order), 'Driver assigned successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
+        }
     }
 
     public function destroy(Order $order)

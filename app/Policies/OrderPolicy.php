@@ -2,9 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\Order;
-use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\Models\{
+    Order,
+    User
+};
 
 class OrderPolicy
 {
@@ -25,7 +26,17 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        return false;
+        // Admin can view any order
+        // Vendor can view orders for their store
+        // Driver can view orders assigned to them
+        // Customer can view their own orders
+        return match (true) {
+            $user->isSuperAdmin() => true,
+            $user->isVendor()     => $order->vendor->owner_id === $user->id,
+            $user->isDriver()     => $order->driver_id === $user->id,
+            $user->isCustomer()   => $order->customer_id === $user->id, 
+            default               => false,
+        };
     }
 
     /**
@@ -67,16 +78,10 @@ class OrderPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Order $order): bool
+    public function assignDriver(User $user, Order $order): bool
     {
-        return false;
+        return $user->isSuperAdmin() || ($user->isVendor() && $order->vendor->owner_id === $user->id);
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Order $order): bool
-    {
-        return false;
-    }
+
 }

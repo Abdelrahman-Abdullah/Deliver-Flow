@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Order;
-use App\Models\Product;
-use App\Models\User;
-use App\Models\Vendor;
+use App\Models\{
+    Order,
+    User,
+    Vendor
+};
 
 class OrderService
 {
@@ -81,6 +82,25 @@ class OrderService
         $order->save();
 
         return $order->fresh(); // Return the updated order with all relationships loaded
+    }
+
+    public function assignDriver(Order $order, int $driverId)
+    {
+        $user = User::findOrFail($driverId);
+        if ($user && !$user->isDriver() ) {
+            throw new \Exception('Only drivers can be assigned to orders');
+        }
+        if (!$user->isActive()) {
+            throw new \Exception('Driver is currently unavailable');
+        }
+        if ($order->status !== Order::STATUS_READY) {
+            throw new \Exception('Only orders that are ready can be assigned to drivers');
+        }
+        $order->update([
+            'driver_id' => $user->id,
+        ]);
+        return $order->fresh('driver');
+
     }
 
     private function getAllowedTransitions(Order $order, User $user): array
