@@ -87,7 +87,7 @@ class OrderController extends Controller
         ]);
 
         try {
-            $order = $this->orderService->assignDriver($order, $request->validated('driver_id'));
+            $order = $this->orderService->assignDriver($order, $request->driver_id);
             return $this->successResponse(new OrderResource($order), 'Driver assigned successfully');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);

@@ -105,7 +105,7 @@ class OrderService
 
     private function getAllowedTransitions(Order $order, User $user): array
     {
-        if ($user->vendor()) {
+        if ($user->isVendor()) {
             return match ($order->status) {
                 Order::STATUS_PENDING   => [Order::STATUS_ACCEPTED, Order::STATUS_CANCELLED],
                 Order::STATUS_ACCEPTED  => [Order::STATUS_PREPARING, Order::STATUS_CANCELLED],
@@ -115,7 +115,7 @@ class OrderService
             };
         }
 
-        if ($user->driver()) {
+        if ($user->isDriver()) {
             return match ($order->status) {
                 Order::STATUS_READY => [Order::STATUS_PICKED_UP],
                 Order::STATUS_PICKED_UP => [Order::STATUS_DELIVERED],
@@ -123,7 +123,7 @@ class OrderService
             };
         }
 
-        if ($user->customer()) {
+        if ($user->isCustomer()) {
             return match ($order->status) {
                 Order::STATUS_PENDING => [Order::STATUS_CANCELLED],
                 default => [],

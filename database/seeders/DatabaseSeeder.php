@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,                // 2. Create users & assign roles
             CategorySeeder::class,            // 3. Create categories
             VendorSeeder::class,              // 4. Create vendor store
+            ProductSeeder::class,             // 5. Create products 
+
         ]);
     }
 }
