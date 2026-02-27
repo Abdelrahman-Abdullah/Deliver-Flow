@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('categories/{category}',  [CategoryController::class, 'destroy']);
 
     // Order management — customer only 
+    Route::get('orders', [OrderController::class, 'index']);
     Route::post('orders', [OrderController::class, 'store']);
 
 });

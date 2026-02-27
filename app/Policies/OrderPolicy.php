@@ -13,7 +13,11 @@ class OrderPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        // super_admin sees ALL orders
+        // vendor sees only THEIR store orders
+        // driver sees only THEIR assigned orders
+        // customer sees only THEIR own orders
+        return true; 
     }
 
     /**
