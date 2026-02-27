@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\VendorController;
 use Illuminate\Support\Facades\Route;
@@ -47,5 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('categories',               [CategoryController::class, 'store']);
     Route::put('categories/{category}',     [CategoryController::class, 'update']);
     Route::delete('categories/{category}',  [CategoryController::class, 'destroy']);
+
+    // Order management — customer only 
+    Route::post('orders', [OrderController::class, 'store']);
 
 });
