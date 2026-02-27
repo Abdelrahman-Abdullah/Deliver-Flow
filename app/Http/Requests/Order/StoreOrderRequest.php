@@ -11,7 +11,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,21 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            // Which vendor to order from
+            'vendor_id'          => ['required', 'exists:vendors,id'],
+
+            // Delivery location
+            'delivery_address'   => ['required', 'string'],
+            'delivery_latitude'  => ['required', 'numeric', 'between:-90,90'],
+            'delivery_longitude' => ['required', 'numeric', 'between:-180,180'],
+
+            // Optional note for the vendor
+            'notes'              => ['nullable', 'string', 'max:500'],
+
+            // Cart items — must have at least one
+            'items'              => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'exists:products,id'],
+            'items.*.quantity'   => ['required', 'integer', 'min:1'],
         ];
     }
 }
