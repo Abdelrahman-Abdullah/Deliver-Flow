@@ -55,5 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('orders/{order}',                   [OrderController::class, 'destroy']);
 
     // Live Location Tracking — driver only
-    Route::patch('drivers/location',                   [LocationController::class, 'update']);
+    Route::patch('driver/location',                    [LocationController::class, 'update']);
+    Route::get('orders/{order}/location',              [LocationController::class, 'currentLocation']);
+    Route::get('orders/{order}/location-history',      [LocationController::class, 'locationHistory']);
+    Route::get('orders/{order}/distance',             [LocationController::class, 'distance']);
 });
