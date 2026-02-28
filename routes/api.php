@@ -1,13 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\{
-    AuthController,
-    CategoryController,
-    OrderController,
-    ProductController,
-    VendorController
-};
-
+use App\Http\Controllers\Api\{ AuthController, CategoryController, OrderController, ProductController, VendorController };
+use App\Http\Controllers\Api\LocationController;
 use Illuminate\Support\Facades\Route;
 
 // -----------------------------------------------
@@ -59,4 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('orders/{order}/status',             [OrderController::class, 'updateStatus']);
     Route::patch('orders/{order}/assign-driver',      [OrderController::class, 'assignDriver']);
     Route::delete('orders/{order}',                   [OrderController::class, 'destroy']);
+
+    // Live Location Tracking — driver only
+    Route::patch('drivers/location',                   [LocationController::class, 'update']);
 });

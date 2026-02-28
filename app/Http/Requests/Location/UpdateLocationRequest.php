@@ -11,7 +11,7 @@ class UpdateLocationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class UpdateLocationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'order_id'  => ['required', 'exists:orders,id'],
+            'latitude'  => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
         ];
     }
 }
