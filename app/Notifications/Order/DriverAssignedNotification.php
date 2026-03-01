@@ -12,7 +12,7 @@ class DriverAssignedNotification extends BaseOrderNotification
 
     public function toArray(object $notifiable): array
     {
-        return $this->buildPayload(
+        return $this->buildPayLoad(
             title:   'New Delivery Assignment 🚗',
             titleAr: 'مهمة توصيل جديدة 🚗',
             body:    "You have been assigned to order #{$this->order->id}. Head to {$this->order->vendor->name_en} to pick it up.",

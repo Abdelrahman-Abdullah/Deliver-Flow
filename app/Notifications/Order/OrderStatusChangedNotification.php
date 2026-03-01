@@ -12,7 +12,7 @@ class OrderStatusChangedNotification extends BaseOrderNotification
     {
         [$title, $titleAr, $body, $bodyAr] = $this->getMessageForStatus();
 
-        return $this->buildPayload(
+        return $this->buildPayLoad(
             title:   $title,
             titleAr: $titleAr,
             body:    $body,
