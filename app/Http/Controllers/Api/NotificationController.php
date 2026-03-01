@@ -42,4 +42,24 @@ class NotificationController extends Controller
         return $this->successResponse(message: 'Notification marked as read.');
     }
 
+    public function markAllAsRead(Request $request)
+    {
+        $request->user()->unreadNotifications->markAsRead();
+
+        return $this->successResponse(message: 'All notifications marked as read.');
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $notification = $request->user()->notifications()->where('id', $id)->first();
+
+        if (!$notification) {
+            return $this->errorResponse('Notification not found.', 404);
+        }
+
+        $notification->delete();
+
+        return $this->successResponse(message: 'Notification deleted successfully.');
+    }
+
 }
