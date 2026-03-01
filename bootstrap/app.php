@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,5 +27,77 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+            $exceptions->render(function (Throwable $e, Request $request) {
+
+                if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+                    return response()->json([
+                        'statsus' => false,
+                        'message' => 'Unauthenticated. Please login.',
+                        'error'   => null
+                    ], 401);
+                }
+
+                if ($e instanceof \Illuminate\Auth\Access\AuthorizationException ||
+                     $e instanceof \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
+
+                    return response()->json([
+                        'statsus' => false,
+                        'message' => 'You are not authorized to perform this action.',
+                        'error'   => null
+                    ], 403);
+                }
+
+                if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                    $model = class_basename($e->getModel());
+                    return response()->json([
+                        'statsus' => false,
+                        'message' => "{$model} not found.",
+                        'error'   => null
+                    ], 404);
+                }
+
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                    return response()->json([
+                        'statsus' => false,
+                        'message' => 'Route not found.',
+                        'error'   => null
+                    ], 404);
+                }
+
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
+                    return response()->json([
+                        'statsus' => false,
+                        'message' => 'Method not allowed.',
+                        'error'   => null
+                    ], 405);
+                }
+
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    return response()->json([
+                        'statsus' => false,
+                        'message' => 'Validation error.',
+                        'error'   => $e->errors()
+                    ], 422);
+                }
+
+                if ($e instanceof Illuminate\Http\Exceptions\ThrottleRequestsException) {
+                    return response()->json([
+                        'statsus' => false,
+                        'message' => 'Too many requests. Please try again later.',
+                        'error'   => null
+                    ], 429);
+                }
+
+                // For other exceptions, return a generic error message in production, or the actual error message in development.
+                return response()->json([
+                    'status'  => false,
+                    'message' => app()->isProduction()
+                        ? 'Server error. Please try again later.'
+                        : $e->getMessage(),
+                    'errors'  => app()->isProduction()
+                        ? null
+                        : ['file' => $e->getFile(), 'line' => $e->getLine()],
+                ], 500);
+            });
         //
     })->create();
