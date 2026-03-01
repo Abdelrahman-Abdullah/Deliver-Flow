@@ -29,4 +29,17 @@ class NotificationController extends Controller
         ], 'Unread notifications retrieved successfully.');
     }
 
+    public function markAsRead(Request $request, $id)
+    {
+        $notification = $request->user()->notifications()->where('id', $id)->first();
+
+        if (!$notification) {
+            return $this->errorResponse('Notification not found.', 404);
+        }
+
+        $notification->markAsRead();
+
+        return $this->successResponse(message: 'Notification marked as read.');
+    }
+
 }
