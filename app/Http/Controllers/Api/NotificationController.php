@@ -16,7 +16,17 @@ class NotificationController extends Controller
 
         return $this->successResponse($notifications, 'Notifications retrieved successfully.');
 
-
     }   
+
+    public function unread(Request $request)
+    {
+        // Fetch only unread notifications
+        $unreadNotifications = $request->user()->unreadNotifications()->latest()->get();
+
+        return $this->successResponse([
+            'count' => $unreadNotifications->count(),
+            'notifications' => $unreadNotifications
+        ], 'Unread notifications retrieved successfully.');
+    }
 
 }
