@@ -50,7 +50,7 @@ class OrderController extends Controller
 
             $order = $this->orderService->placeOrder(auth()->user(), $request->validated());
 
-            return $this->createdResponse(new OrderResource($order), 'Order placed successfully', 201);
+            return $this->createdResponse(new OrderResource($order), 'Order placed successfully');
 
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);

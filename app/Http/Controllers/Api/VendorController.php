@@ -50,7 +50,6 @@ class VendorController extends Controller
         return $this->createdResponse(
             new VendorResource($vendor),
             'Vendor created successfully.',
-            201
         );
     }
 
