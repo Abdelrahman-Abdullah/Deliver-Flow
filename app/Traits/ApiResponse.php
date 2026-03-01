@@ -41,9 +41,10 @@ trait ApiResponse
      */
     protected function createdResponse(
         mixed $data = null,
-        string $message = 'Created successfully'
+        string $message = 'Created successfully',
+        int $statusCode = 201
     ): JsonResponse {
-        return $this->successResponse($data, $message, 201);
+        return $this->successResponse($data, $message, $statusCode);
     }
 
     /**

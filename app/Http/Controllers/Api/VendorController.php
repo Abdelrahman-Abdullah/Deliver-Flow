@@ -36,7 +36,7 @@ class VendorController extends Controller
     }
 
     // POST /api/vendors — super_admin only
-    public function store(StoreVendorRequest $request , Vendor $vendor): JsonResponse
+    public function store(StoreVendorRequest $request): JsonResponse
     {
         $this->authorize('create', Vendor::class);
 

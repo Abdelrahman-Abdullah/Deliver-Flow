@@ -48,12 +48,12 @@ class OrderController extends Controller
         try {
             $this->authorize('create', Order::class);
 
-            $order = $this->orderService->placeOrder(auth()->user(), $request->validated());
+            $order = $this->orderService->placeOrder($request->user(), $request->validated());
 
             return $this->createdResponse(new OrderResource($order), 'Order placed successfully');
 
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
+            return $this->errorResponse($e->getMessage(), null, 400);
         }
     }
 
@@ -70,11 +70,11 @@ class OrderController extends Controller
 
         try {
 
-            $order = $this->orderService->updateOrderStatus($order, auth()->user(), $request->validated('status'));
+            $order = $this->orderService->updateOrderStatus($order, $request->user(), $request->validated('status'));
             return $this->successResponse(new OrderResource($order), 'Order status updated successfully');
             
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
+            return $this->errorResponse($e->getMessage(), null, 400);
         }
 
     }
@@ -90,19 +90,19 @@ class OrderController extends Controller
             $order = $this->orderService->assignDriver($order, $request->driver_id);
             return $this->successResponse(new OrderResource($order), 'Driver assigned successfully');
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
+            return $this->errorResponse($e->getMessage(), null, 400);
         }
     }
 
-    public function destroy(Order $order)
+    public function destroy(Request $request, Order $order)
     {
         $this->authorize('cancel', $order);
         
         try {
-            $this->orderService->updateOrderStatus($order, auth()->user(), Order::STATUS_CANCELLED);
+            $this->orderService->updateOrderStatus($order, $request->user(), Order::STATUS_CANCELLED);
             return $this->successResponse(null, 'Order cancelled successfully');
         } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
+            return $this->errorResponse($e->getMessage(), null, 400);
         }
     }
 

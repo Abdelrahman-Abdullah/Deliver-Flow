@@ -30,7 +30,7 @@ abstract class BaseOrderNotification extends Notification implements ShouldQueue
 
     abstract public function toArray(object $notifiable): array;
 
-    public function buildPayLoad(
+    public function buildPayload(
         string $title,
         string $titleAr,
         string $body,
@@ -46,6 +46,5 @@ abstract class BaseOrderNotification extends Notification implements ShouldQueue
             'sent_at' => now(),
         ];
     }
-
 
 }

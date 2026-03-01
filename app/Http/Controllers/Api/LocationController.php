@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Location\UpdateLocationRequest;
-use App\Models\DriverLocation;
 use App\Models\Order;
 use App\Services\LocationService;
 use App\Traits\ApiResponse;
@@ -23,6 +22,10 @@ class LocationController extends Controller
             return $this->forbiddenResponse('Only drivers can update location');
         }
         $order = Order::find($request->order_id);
+
+        if (!$order) {
+            return $this->notFoundResponse('Order not found');
+        }
 
         if ($driver->id != $order->driver_id) {
             return $this->forbiddenResponse('You can only update location for your assigned order');

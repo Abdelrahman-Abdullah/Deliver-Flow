@@ -68,7 +68,7 @@ class OrderPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function cancelgi(User $user, Order $order): bool
+    public function cancel(User $user, Order $order): bool
     {
         return $user->isCustomer()
          && $order->customer_id === $user->id 

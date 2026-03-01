@@ -10,6 +10,10 @@ use App\Models\{
 
 class OrderService
 {
+    public function __construct(
+        protected NotificationService $notificationService
+    ) {}
+
     public function placeOrder(User $customer, array $data)
     {
        $vendor = Vendor::findOrFail($data['vendor_id']);
@@ -60,6 +64,7 @@ class OrderService
         //Create all order items at once (one DB query)
 
         $order->items()->createMany($orderItems);
+        $this->notificationService->notifyOrderPlaced($order);
 
         return $order->load('items.product', 'customer', 'vendor'); // Eager load items and their associated products for the response
 
@@ -81,6 +86,8 @@ class OrderService
         }
         $order->save();
 
+        $this->notificationService->notifyOrderStatusChanged($order);
+
         return $order->fresh(); // Return the updated order with all relationships loaded
     }
 
@@ -99,7 +106,9 @@ class OrderService
         $order->update([
             'driver_id' => $user->id,
         ]);
-        return $order->fresh('driver');
+
+        $this->notificationService->notifyDriverAssigned($order);
+        return $order->fresh(); // Return the updated order with all relationships loaded
 
     }
 
