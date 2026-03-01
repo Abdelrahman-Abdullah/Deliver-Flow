@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\{ AuthController, CategoryController, OrderController, ProductController, VendorController };
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // -----------------------------------------------
@@ -62,4 +63,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('orders/{order}/location',              [LocationController::class, 'currentLocation']);
     Route::get('orders/{order}/location-history',      [LocationController::class, 'locationHistory']);
     Route::get('orders/{order}/distance',              [LocationController::class, 'distance']);
+
+        // Notifications
+    Route::get('notifications',             [NotificationController::class, 'index']);
+    Route::get('notifications/unread',      [NotificationController::class, 'unread']);
+    Route::patch('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('notifications/read-all',  [NotificationController::class, 'markAllAsRead']);
+    Route::delete('notifications/{id}',     [NotificationController::class, 'destroy']);
 });
