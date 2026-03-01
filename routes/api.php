@@ -7,23 +7,24 @@ use Illuminate\Support\Facades\Route;
 // -----------------------------------------------
 // Public routes — no authentication needed
 // -----------------------------------------------
-Route::prefix('auth')->group(function () {
+Route::middleware('throttle:auth')->prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login',    [AuthController::class, 'login']);
 });
 
 // Public browsing
-Route::get('vendors',                    [VendorController::class,  'index']);
-Route::get('vendors/{vendor}',           [VendorController::class,  'show']);
-Route::get('vendors/{vendor}/products',  [ProductController::class, 'index']);
-Route::get('products/{product}',         [ProductController::class, 'show']);
-Route::get('categories',                 [CategoryController::class,'index']);
-Route::get('categories/{category}',      [CategoryController::class,'show']);
-
+Route::middleware('throttle:api')->group(function () {
+    Route::get('vendors',                    [VendorController::class,  'index']);
+    Route::get('vendors/{vendor}',           [VendorController::class,  'show']);
+    Route::get('vendors/{vendor}/products',  [ProductController::class, 'index']);
+    Route::get('products/{product}',         [ProductController::class, 'show']);
+    Route::get('categories',                 [CategoryController::class,'index']);
+    Route::get('categories/{category}',      [CategoryController::class,'show']);
+});
 // -----------------------------------------------
 // Protected routes — must be authenticated
 // -----------------------------------------------
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Auth
     Route::prefix('auth')->group(function () {
@@ -55,7 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('orders/{order}',                   [OrderController::class, 'destroy']);
 
     // Location Tracking 
-    Route::patch('driver/location',                    [LocationController::class, 'update']);
+    Route::middleware('throttle:location')->group(function () {
+        Route::patch('driver/location',                    [LocationController::class, 'update']);
+    });
     Route::get('orders/{order}/location',              [LocationController::class, 'currentLocation']);
     Route::get('orders/{order}/location-history',      [LocationController::class, 'locationHistory']);
     Route::get('orders/{order}/distance',              [LocationController::class, 'distance']);
