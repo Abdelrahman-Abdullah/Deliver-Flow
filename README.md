@@ -1,6 +1,6 @@
 # DeliverFlow API 🚀
 
-A multi-vendor real-time delivery tracking platform built with Laravel 11.
+A multi-vendor real-time delivery tracking platform built with Laravel 12.
 
 ## Tech Stack
 
